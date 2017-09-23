@@ -22,8 +22,9 @@ namespace EFCore2Playgrounds
                 dbContext.SaveChanges();
                 var order = new Order();
                 order.AddCategory(category);
-                dbContext.Orders.Add(order);
-                dbContext.SaveChanges();
+                dbContext.Orders.Add(order); var affected = dbContext.SaveChanges();
+                if (affected == 2) Console.WriteLine("Expected amount of objects saved");
+                    else Console.WriteLine("affected count is not 2 ");
             }
 
             Console.Read();
@@ -36,8 +37,8 @@ namespace EFCore2Playgrounds
         private int StateId;
         private State _state;
         private State State => _state;
-        private List<OrderCategory> _orderCategories = new List<OrderCategory>();
-        private IReadOnlyCollection<OrderCategory> OrderCategories => _orderCategories.ToList();
+        private List<OrderCategory> _orderCategories { get; set; } = new List<OrderCategory>();
+        //private IReadOnlyCollection<OrderCategory> OrderCategories => _orderCategories.ToList();
 
         public Order()
         {
@@ -105,7 +106,7 @@ namespace EFCore2Playgrounds
                 .HasKey(x => new {x.OrderId, x.CategoryId});
             modelBuilder.Entity<OrderCategory>()
                 .HasOne(typeof(Order), nameof(Order))
-                .WithMany()
+                .WithMany("_orderCategories")
                 .HasForeignKey("OrderId");
             modelBuilder.Entity<OrderCategory>()
                 .HasOne(typeof(Category), nameof(Category))
