@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EFCore2Playgrounds
 {
-    class Program
-    {
-        static void Main(string[] args)
+    static void Main(string[] args)
         {
             using (var dbContext = new MyDbContext())
             {
@@ -23,7 +21,9 @@ namespace EFCore2Playgrounds
                 var order = new Order();
                 order.AddCategory(category);
                 dbContext.Orders.Add(order);
-                dbContext.SaveChanges();
+                var affected = dbContext.SaveChanges();
+                if (affected == 2) Console.WriteLine("Expected amount of objects saved");
+                        else Console.WriteLine("affected count is not 2 ");
             }
 
             Console.Read();
@@ -34,10 +34,8 @@ namespace EFCore2Playgrounds
     {
         public int Id { get; set; }
         private int StateId;
-        private State _state;
-        private State State => _state;
-        private List<OrderCategory> _orderCategories = new List<OrderCategory>();
-        private IReadOnlyCollection<OrderCategory> OrderCategories => _orderCategories.ToList();
+        private State State { get; set; }
+        private List<OrderCategory> _orderCategories { get; set; } = new List<OrderCategory>();
 
         public Order()
         {
@@ -56,7 +54,7 @@ namespace EFCore2Playgrounds
 
         public void AddCategory(Category category)
         {
-            _orderCategories.Add(new OrderCategory {Category = category, Order = this});
+            _orderCategories.Add(new OrderCategory { Category = category, Order = this });
         }
     }
 
@@ -95,20 +93,21 @@ namespace EFCore2Playgrounds
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<State>()
-                .Property(x => x.Id).ValueGeneratedNever();
+            modelBuilder.Entity<State>() .Property(x => x.Id).ValueGeneratedNever();
             modelBuilder.Entity<Order>()
                 .HasOne(typeof(State), nameof(State))
                 .WithMany()
                 .HasForeignKey("StateId");
+
             modelBuilder.Entity<OrderCategory>()
-                .HasKey(x => new {x.OrderId, x.CategoryId});
+                .HasKey(x => new { x.OrderId, x.CategoryId });
+
             modelBuilder.Entity<OrderCategory>()
-                .HasOne(typeof(Order), nameof(Order))
-                .WithMany()
+                .HasOne(oc=>oc.Order)
+                .WithMany("_orderCategories")
                 .HasForeignKey("OrderId");
             modelBuilder.Entity<OrderCategory>()
-                .HasOne(typeof(Category), nameof(Category))
+                .HasOne(oc => oc.Category)
                 .WithMany()
                 .HasForeignKey("CategoryId");
         }
