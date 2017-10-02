@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using EFCore2Playgrounds.ManyToMany;
+using EFCore2Playgrounds.OneToMany;
 using Microsoft.EntityFrameworkCore;
+using Order = EFCore2Playgrounds.ManyToMany.Order;
 
 namespace EFCore2Playgrounds
 {
@@ -9,109 +11,50 @@ namespace EFCore2Playgrounds
     {
         static void Main(string[] args)
         {
-            using (var dbContext = new MyDbContext())
-            {
-                dbContext.Database.Migrate();
-                var draftState = new State { Id = 1, Name = "Draft" };
-                var cancelState = new State { Id = 2, Name = "Cancel" };
-                dbContext.States.Add(draftState);
-                dbContext.States.Add(cancelState);
-                dbContext.SaveChanges();
-                var category = new Category { Name = "Vip" };
-                dbContext.Categories.Add(category);
-                dbContext.SaveChanges();
-                var order = new Order();
-                order.AddCategory(category);
-                dbContext.Orders.Add(order); var affected = dbContext.SaveChanges();
-                if (affected == 2) Console.WriteLine("Expected amount of objects saved");
-                    else Console.WriteLine("affected count is not 2 ");
-            }
+            //ManyToMany();
+
+            OneToMany();
 
             Console.Read();
         }
-    }
 
-    public class Order
-    {
-        public int Id { get; set; }
-        private int StateId;
-        private State _state;
-        private State State => _state;
-        private List<OrderCategory> _orderCategories { get; set; } = new List<OrderCategory>();
-        //private IReadOnlyCollection<OrderCategory> OrderCategories => _orderCategories.ToList();
-
-        public Order()
+        private static void ManyToMany()
         {
-            StateId = 1;
+            using (var dbContext = new ManyToManyDbContext())
+            {
+                dbContext.Database.Migrate();
+                var category = new Category {Id = 1, Name = "Vip"};
+                dbContext.Categories.Add(category);
+                dbContext.SaveChanges();
+                var order = new Order();
+                dbContext.Orders.Add(order);
+                dbContext.SaveChanges();
+                order = dbContext.Orders.Include("orderCategories").SingleOrDefault(o => o.Id == 1);
+                order.AddCategory(new Category() {Id = 1});
+                dbContext.Orders.Add(order);
+                var affected = dbContext.SaveChanges();
+                Console.WriteLine(affected == 2 ? "Expected amount of objects saved" : "affected count is not 2 ");
+            }
         }
 
-        public void Cancel()
+        private static void OneToMany()
         {
-            StateId = 2;
-        }
-
-        public IEnumerable<Category> GetCategories()
-        {
-            return _orderCategories.Select(x => x.Category);
-        }
-
-        public void AddCategory(Category category)
-        {
-            _orderCategories.Add(new OrderCategory {Category = category, Order = this});
-        }
-    }
-
-    public class State
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
-    public class OrderCategory
-    {
-        public int OrderId { get; set; }
-        public Order Order { get; set; }
-        public int CategoryId { get; set; }
-        public Category Category { get; set; }
-    }
-
-    public class Category
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
-    public class MyDbContext : DbContext
-    {
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<State> States { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<OrderCategory> OrderCategories { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=efcoreplaygrounds;Trusted_Connection=yes",
-                builder => builder.MigrationsAssembly("EFCore2Playgrounds"));
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<State>()
-                .Property(x => x.Id).ValueGeneratedNever();
-            modelBuilder.Entity<Order>()
-                .HasOne(typeof(State), nameof(State))
-                .WithMany()
-                .HasForeignKey("StateId");
-            modelBuilder.Entity<OrderCategory>()
-                .HasKey(x => new {x.OrderId, x.CategoryId});
-            modelBuilder.Entity<OrderCategory>()
-                .HasOne(typeof(Order), nameof(Order))
-                .WithMany("_orderCategories")
-                .HasForeignKey("OrderId");
-            modelBuilder.Entity<OrderCategory>()
-                .HasOne(typeof(Category), nameof(Category))
-                .WithMany()
-                .HasForeignKey("CategoryId");
+            using (var context = new OneToManyDbContext())
+            {
+                context.Database.Migrate();
+                if (!context.States.Any())
+                {
+                    context.States.AddRange(State.GetStatus());
+                    context.SaveChanges();
+                }
+                var order = new OneToMany.Order();
+                context.Orders.Add(order);
+                context.SaveChanges();
+                var order2 = context.Orders.Include("State").First();
+                order2.Release();
+                context.SaveChanges();
+                var order3 = context.Orders.First();
+            }
         }
     }
 }
