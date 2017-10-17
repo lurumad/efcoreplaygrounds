@@ -4,6 +4,8 @@ using EFCore2Playgrounds.ManyToMany;
 using EFCore2Playgrounds.OneToMany;
 using Microsoft.EntityFrameworkCore;
 using Order = EFCore2Playgrounds.ManyToMany.Order;
+using EFCore2Playgrounds.ValueObject;
+using EFCore2Playgrounds.OneToOne;
 
 namespace EFCore2Playgrounds
 {
@@ -13,7 +15,11 @@ namespace EFCore2Playgrounds
         {
             //ManyToMany();
 
-            OneToMany();
+            //OneToMany();
+
+            //ValueObject();
+
+            OneToOne();
 
             Console.Read();
         }
@@ -47,13 +53,38 @@ namespace EFCore2Playgrounds
                     context.States.AddRange(State.GetStatus());
                     context.SaveChanges();
                 }
-                var order = new OneToMany.Order();
-                context.Orders.Add(order);
+                var newOrder = new OneToMany.Order();
+                context.Orders.Add(newOrder);
                 context.SaveChanges();
-                var order2 = context.Orders.Include("State").First();
-                order2.Release();
+                var order = context.Orders.Include(nameof(State)).First();
+                order.Release();
                 context.SaveChanges();
-                var order3 = context.Orders.First();
+                order = context.Orders.First();
+            }
+        }
+
+        private static void ValueObject()
+        {
+            using (var context = new ValueObjectDbContext())
+            {
+                context.Database.Migrate();
+                var post = Post.New("DeveloperOS Madrid 2017");
+                context.Posts.Add(post);
+                context.SaveChanges();
+                var order = context.Posts.First();
+                Console.WriteLine(post.Slug);
+            }
+        }
+
+        private static void OneToOne()
+        {
+            using (var context = new OneToOneDbContext())
+            {
+                context.Database.Migrate();
+                var newAuthor = Author.New(Biography.New("Lorem ipsum..."));
+                context.Authors.Add(newAuthor);
+                context.SaveChanges();
+                var author = context.Authors.Include(nameof(Author.Biography)).First();
             }
         }
     }
