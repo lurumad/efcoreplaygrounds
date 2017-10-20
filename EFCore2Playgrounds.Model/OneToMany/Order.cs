@@ -1,4 +1,4 @@
-﻿namespace EFCore2Playgrounds.OneToMany
+﻿namespace EFCore2Playgrounds.Model.OneToMany
 {
     public class Order
     {

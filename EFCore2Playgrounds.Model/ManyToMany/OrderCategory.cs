@@ -1,4 +1,4 @@
-﻿namespace EFCore2Playgrounds.ManyToMany
+﻿namespace EFCore2Playgrounds.Model.ManyToMany
 {
     public class OrderCategory
     {

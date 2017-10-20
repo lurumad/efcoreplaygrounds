@@ -1,7 +1,7 @@
-﻿using EFCore2Playgrounds.ManyToMany;
+﻿using EFCore2Playgrounds.Model.OneToMany;
 using Microsoft.EntityFrameworkCore;
 
-namespace EFCore2Playgrounds.OneToMany
+namespace EFCore2Playgrounds.Infrastructure
 {
     public class OneToManyDbContext : DbContext
     {
@@ -11,12 +11,11 @@ namespace EFCore2Playgrounds.OneToMany
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=efcoreplaygrounds2;Trusted_Connection=yes",
-                builder => builder.MigrationsAssembly("EFCore2Playgrounds"));
+                builder => builder.MigrationsAssembly("EFCore2Playgrounds.Infrastructure"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
             modelBuilder.Entity<Order>().HasKey(x => x.Id);
             modelBuilder.Entity<Order>()
                 .HasOne(typeof(State), nameof(State))

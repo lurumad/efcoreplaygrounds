@@ -1,17 +1,22 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace EFCore2Playgrounds.ValueObject
+namespace EFCore2Playgrounds.Model.ValueObject
 {
     public class Slug
     {
         public string Value { get; protected set; }
 
-        public Slug(string text)
+        private Slug() { }
+
+        private Slug(string text)
         {
             Value = Parse(text);
         }
 
-        private Slug() { }
+        public static Slug New(string text)
+        {
+            return new Slug(text);
+        }
 
         private string Parse(string text)
         {

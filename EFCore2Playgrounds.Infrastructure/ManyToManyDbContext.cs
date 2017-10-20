@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCore2Playgrounds.Model;
+using EFCore2Playgrounds.Model.ManyToMany;
+using Microsoft.EntityFrameworkCore;
 
-namespace EFCore2Playgrounds.ManyToMany
+namespace EFCore2Playgrounds.Infrastructure
 {
     public class ManyToManyDbContext : DbContext
     {
@@ -11,7 +13,7 @@ namespace EFCore2Playgrounds.ManyToMany
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=efcoreplaygrounds;Trusted_Connection=yes",
-                builder => builder.MigrationsAssembly("EFCore2Playgrounds"));
+                builder => builder.MigrationsAssembly("EFCore2Playgrounds.Infrastructure"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,11 +24,11 @@ namespace EFCore2Playgrounds.ManyToMany
                 .HasKey(x => new {x.OrderId, x.CategoryId});
             modelBuilder.Entity<OrderCategory>()
                 .HasOne(typeof(Order), nameof(Order))
-                .WithMany(nameof(Order.orderCategories))
+                .WithMany(Constanst.OrderOrderCategories)
                 .HasForeignKey($"{nameof(Order)}{nameof(Order.Id)}");
             modelBuilder.Entity<OrderCategory>()
                 .HasOne(typeof(Category), nameof(Category))
-                .WithMany(nameof(Category.orderCategories))
+                .WithMany(Constanst.CategoryOrderCategories)
                 .HasForeignKey($"{nameof(Category)}{nameof(Category.Id)}");
         }
     }

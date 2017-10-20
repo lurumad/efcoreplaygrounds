@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace EFCore2Playgrounds.ManyToMany
+namespace EFCore2Playgrounds.Model.ManyToMany
 {
     public class Order
     {

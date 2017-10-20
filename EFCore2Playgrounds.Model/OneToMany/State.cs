@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EFCore2Playgrounds.OneToMany
+namespace EFCore2Playgrounds.Model.OneToMany
 {
     public class State
     {

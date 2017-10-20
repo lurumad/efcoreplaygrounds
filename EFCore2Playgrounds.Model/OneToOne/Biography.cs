@@ -1,4 +1,4 @@
-﻿namespace EFCore2Playgrounds.OneToOne
+﻿namespace EFCore2Playgrounds.Model.OneToOne
 {
     public class Biography
     {

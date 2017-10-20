@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCore2Playgrounds.Model.OneToOne;
+using Microsoft.EntityFrameworkCore;
 
-namespace EFCore2Playgrounds.OneToOne
+namespace EFCore2Playgrounds.Infrastructure
 {
     public class OneToOneDbContext : DbContext
     {
@@ -10,7 +11,7 @@ namespace EFCore2Playgrounds.OneToOne
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=efcoreplaygrounds2;Trusted_Connection=yes",
-                builder => builder.MigrationsAssembly("EFCore2Playgrounds"));
+                builder => builder.MigrationsAssembly("EFCore2Playgrounds.Infrastructure"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
